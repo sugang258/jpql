@@ -39,32 +39,19 @@ public class JpaMain {
             member3.setTeam(teamB);
             em.persist(member3);
 
-            em.flush();
-            em.clear();
+            //FLUSH 자동 호출
+           int count = em.createQuery("update Member m set m.age = 20")
+                    .executeUpdate();
 
-            /*
-                가급적 묵시적 조인 대신에 명시적 조인 사용
-                조인은 SQL 튜닝에 중요 포인트
-                묵시적 조인은 조인이 일어나는 상황을 한눈에 파악하기 어려움
-             */
+           //영속성 컨텍스트 초기화
+           em.clear();
 
-            String query =
-                    "select t From Team t ";
+           //회원 다시 조회
+           Member findMember = em.find(Member.class, member1.getId());
+           System.out.println(findMember.getAge());
 
-            List<Team> result = em.createQuery(query, Team.class)
-                    .setFirstResult(0)
-                    .setMaxResults(2)
-                    .getResultList();
+            System.out.println(count);
 
-            System.out.println(result.size());
-
-            for (Team team : result) {
-                System.out.println(team.getName() + ", " + team.getMembers().size());
-                for(Member member : team.getMembers()) {
-                    System.out.println("-> member = " + member);
-                }
-
-            }
 
             tx.commit();
         }catch (Exception e) {
